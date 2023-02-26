@@ -86,7 +86,7 @@ int build_sender(const char * hostname, const char * port){
         return -1;
     } //if
     
-    cout << "Connecting to " << hostname << " on port " << port << "..." << endl;
+    // cout << "Connecting to " << hostname << " on port " << port << "..." << endl;
     
     status = connect(socket_fd, host_info_list->ai_addr, host_info_list->ai_addrlen);
     //stream sockets may successfully connect() only once; Y

@@ -17,7 +17,7 @@ int main(int argc, char const *argv[])
         return 1;
     }
     //get port number 
-    std::string listen_port = argv[1];
+    std::string listen_port(argv[1]);
 
     //get player number
     int player_num = 0;
@@ -31,7 +31,7 @@ int main(int argc, char const *argv[])
         std::cerr << e.what() << '\n' << "Please input legal player numebr!" << "\n";
         return 1;
     }
-    if (player_num < 1 || player_num > 1020){
+    if (player_num <= 1 || player_num > 1020){
         std::cout << player_num << std::endl;
         std::cout << "Please input legal player numebr!" << std::endl;
         return 1;
@@ -85,8 +85,9 @@ int main(int argc, char const *argv[])
         struct sockaddr_in * addr = (struct sockaddr_in *)&socket_addr;
         
         //store ip
-        std::string ip = inet_ntoa(addr->sin_addr);
+        std::string ip (inet_ntoa(addr->sin_addr));
         ip_list[i] = ip;
+
         //store fd
         player_fd_list[i] = client_connect_fd;
 
@@ -102,6 +103,7 @@ int main(int argc, char const *argv[])
         
         //store port number
         port_list[i] = port_num;  
+        std::cout << "Player " << i << " is ready to play " << std::endl;
     }
     //send player id and neighbor info
     for (int i = 0; i < player_num; i++)
@@ -118,22 +120,29 @@ int main(int argc, char const *argv[])
         //send right_neighbot ip
         if (i == player_num - 1)
         {
-            status = send(player_fd_list[i], &ip_list[0], ip_list[0].length() + 1, 0);
+            status = send(player_fd_list[i], ip_list[0].c_str(), ip_list[0].length() + 1, 0);
         }
         else{
-            status = send(player_fd_list[i], &ip_list[i + 1], ip_list[i + 1].length() + 1, 0);
+            status = send(player_fd_list[i], ip_list[i + 1].c_str(), ip_list[i + 1].length() + 1, 0);
         }
-
+    }
+    
+    for (int i = 0; i < player_num; i++)
+    {
         //receive id
         int id_confirm = -1;
-        status = recv(player_fd_list[i], &id_confirm, sizeof(id_confirm), 0);
+        status = recv(player_fd_list[i], &id_confirm, sizeof(id_confirm), MSG_WAITALL);
 
         //set status as 1 or 0
         if (id_confirm != i){
             status = 0;
         }
-        
-        std::cout << "Player " << i << " is ready to play " << std::endl;
+    }
+
+    for (int i = 0; i < player_num; i++)
+    {
+        int signal = 1;
+        send(player_fd_list[i], &signal, sizeof(signal), 0);
     }
     
     if (status == 0)
@@ -143,6 +152,14 @@ int main(int argc, char const *argv[])
     }
     if (hops_num == 0)
     {
+        //end send potato with hops = 0 and quit
+        for (int i = 0; i < player_num; i++) {
+            send(player_fd_list[i], &cur_potato, sizeof(cur_potato), 0);
+        }
+        std::cout << "Trace of potato:" << std::endl;
+        for(int i = 0; i < cur_potato.index; i++){
+            std::cout<< i << ',';
+        }
         shut_down(player_fd_list, player_num, listen_fd);
         return 0;
     }
@@ -150,13 +167,14 @@ int main(int argc, char const *argv[])
     //send out first potato
     srand((unsigned)time(NULL));
     int random_number = rand() % player_num;
-    send(player_fd_list[random_number], &cur_potato, sizeof(cur_potato), 0);
     std::cout << "Ready to start the game, sending potato to player " << random_number << std::endl;
 
-    
+    send(player_fd_list[random_number], &cur_potato, sizeof(cur_potato), 0);
+
     //wait for potato
     fd_set readfds;
     int nfds = *max_element(player_fd_list, player_fd_list + player_num);
+
     FD_ZERO(&readfds);
     
     for (int i = 0; i < player_num; i++) {
@@ -166,7 +184,7 @@ int main(int argc, char const *argv[])
     select(nfds + 1, &readfds, NULL, NULL, NULL);
     for (int i = 0; i < player_num; i++) {
       if (FD_ISSET(player_fd_list[i], &readfds)) {
-        recv(player_fd_list[i], &cur_potato, sizeof(cur_potato), 0);
+        recv(player_fd_list[i], &cur_potato, sizeof(cur_potato), MSG_WAITALL);
         break;
       }
     }
@@ -177,9 +195,10 @@ int main(int argc, char const *argv[])
     }
     std::cout << "Trace of potato:" << std::endl;
     for(int i = 0; i < cur_potato.index; i++){
-        std::cout<< i << ',';
+        std::cout<< cur_potato.track[i] << ',';
     }
-    
+    std::cout<< "" << std::endl;
+
     shut_down(player_fd_list, player_num, listen_fd);
     return 0;
 }
