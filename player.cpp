@@ -12,7 +12,7 @@ int main(int argc, char const *argv[])
 {
     const int BUFFER_SIZE = 512;
     if (argc != 3) {
-        cout << "Usage: player <machine_name> <port_num>" << endl;
+        std::cout << "Usage: player <machine_name> <port_num>" << std::endl;
         return 1;
     }
     //get master host name
@@ -24,7 +24,7 @@ int main(int argc, char const *argv[])
     int master_fd = build_sender(master_name.c_str(), master_port.c_str());
     if (master_fd == -1)
     {
-        cout << "Join failed, check your input!" << endl;
+        std::cout << "Join failed, check your input!" << std::endl;
         return 1;
     }
     
@@ -69,7 +69,7 @@ int main(int argc, char const *argv[])
     int right_fd = build_sender(right_ip.c_str(), std::to_string(right_port).c_str());
 
     //print connected
-    cout << "Connected as player " << id 
+    std::cout << "Connected as player " << id 
     << " out of " << player_num << " total players\n";
 
     //wait for potato
@@ -111,11 +111,11 @@ int main(int argc, char const *argv[])
             int random_number = rand() % 2;
             if(rand){
                 int right_id = (id + player_num + 1) % player_num;
-                cout << "Sending potato to " << right_id << endl;
+                std::cout << "Sending potato to " << right_id << std::endl;
                 send(right_fd, &cur_potato, sizeof(cur_potato), 0);
             }else{
                 int left_id = (id + player_num - 1) % player_num;
-                cout << "Sending potato to " << left_id << endl;
+                std::cout << "Sending potato to " << left_id << std::endl;
                 send(left_fd, &cur_potato, sizeof(cur_potato), 0);
             }
         }

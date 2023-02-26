@@ -8,10 +8,12 @@
 #include <ctime>
 #include <algorithm>
 
+void shut_down(int* socket_list, int size, int master_fd);
+
 int main(int argc, char const *argv[])
 {
     if (argc != 4) {
-        cout << "Usage: ringmaster <port_num> <num_players> <num_hops>" << endl;
+        std::cout << "Usage: ringmaster <port_num> <num_players> <num_hops>" << std::endl;
         return 1;
     }
     //get port number 
@@ -21,7 +23,8 @@ int main(int argc, char const *argv[])
     int player_num = 0;
     try
     {
-        int player_num = std::stoi(argv[2]);
+        std::string temp(argv[2]);
+        player_num = std::stoi(temp);
     }
     catch(const std::exception& e)
     {
@@ -29,7 +32,8 @@ int main(int argc, char const *argv[])
         return 1;
     }
     if (player_num < 1 || player_num > 1020){
-        cout << "Please input legal player numebr!" << endl;
+        std::cout << player_num << std::endl;
+        std::cout << "Please input legal player numebr!" << std::endl;
         return 1;
     }
 
@@ -37,7 +41,8 @@ int main(int argc, char const *argv[])
     int hops_num = -1;
     try
     {
-        int hops_num = std::stoi(argv[3]);
+        std::string temp(argv[3]);
+        hops_num = std::stoi(temp);
     }
     catch(const std::exception& e)
     {
@@ -45,7 +50,7 @@ int main(int argc, char const *argv[])
         return 1;
     }
     if (hops_num < 0 || player_num > 512){
-        cout << "Please input legal hops numebr!" << endl;
+        std::cout << "Please input legal hops numebr!" << std::endl;
         return 1;
     }
 
@@ -54,7 +59,7 @@ int main(int argc, char const *argv[])
     //build listener
     int listen_fd = build_listener(listen_port.c_str());
     if (listen_fd == -1){
-        cout << "Please input legal port numebr!" << endl;
+        std::cout << "Please input legal port numebr!" << std::endl;
         return 1;
     }
     
@@ -128,7 +133,7 @@ int main(int argc, char const *argv[])
             status = 0;
         }
         
-        cout << "Player " << i << " is ready to play " << endl;
+        std::cout << "Player " << i << " is ready to play " << std::endl;
     }
     
     if (status == 0)
@@ -146,7 +151,7 @@ int main(int argc, char const *argv[])
     srand((unsigned)time(NULL));
     int random_number = rand() % player_num;
     send(player_fd_list[random_number], &cur_potato, sizeof(cur_potato), 0);
-    cout << "Ready to start the game, sending potato to player " << random_number << endl;
+    std::cout << "Ready to start the game, sending potato to player " << random_number << std::endl;
 
     
     //wait for potato
