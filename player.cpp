@@ -100,7 +100,7 @@ int main(int argc, char const *argv[])
     int nfds = max(master_fd, max(left_fd, right_fd));
 
     potato cur_potato = potato();
-    srand((unsigned)time(NULL) + left_port);
+    srand((unsigned)time(NULL) + id);
     while (true)
     {
         FD_ZERO(&readfds);

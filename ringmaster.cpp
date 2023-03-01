@@ -197,7 +197,6 @@ int main(int argc, char const *argv[])
     for(int i = 0; i < cur_potato.index; i++){
         std::cout<< cur_potato.track[i] << ',';
     }
-    std::cout<< "" << std::endl;
 
     shut_down(player_fd_list, player_num, listen_fd);
     return 0;
